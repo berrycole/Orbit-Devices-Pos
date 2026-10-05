@@ -1,6 +1,8 @@
 /vendor/
 /.env
-/writable/*
+/writable/**/*
+!/writable/**/
+!/writable/**/.gitkeep
 !/writable/.gitkeep
 /build/
 /tests/_support/
@@ -8,3 +10,4 @@
 *.log
 /local-access.txt
 /.phpunit.result.cache
+
