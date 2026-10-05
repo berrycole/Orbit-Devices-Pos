@@ -1,0 +1,7 @@
+.git
+.env
+vendor
+writable/*
+tests
+build
+local-access.txt

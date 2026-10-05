@@ -1,0 +1,14 @@
+name: POS checks
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: intl, mbstring, mysqli, sqlite3, gd, fileinfo
+          coverage: none
+      - run: composer install --prefer-dist --no-interaction
+      - run: php vendor/bin/phpunit
