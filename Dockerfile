@@ -1,7 +1,7 @@
 FROM php:8.3-apache
-RUN apt-get update && apt-get install -y --no-install-recommends libicu-dev libpng-dev libjpeg62-turbo-dev libwebp-dev libonig-dev libsqlite3-dev unzip git \
+RUN apt-get update && apt-get install -y --no-install-recommends libicu-dev libpng-dev libjpeg62-turbo-dev libwebp-dev libonig-dev unzip git \
     && docker-php-ext-configure gd --with-jpeg --with-webp \
-    && docker-php-ext-install intl mbstring mysqli gd sqlite3 \
+    && docker-php-ext-install intl mbstring mysqli gd \
     && a2enmod rewrite headers \
     && rm -rf /var/lib/apt/lists/*
 COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
