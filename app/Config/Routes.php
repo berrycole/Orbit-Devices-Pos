@@ -18,5 +18,5 @@ $routes->group('', ['filter'=>'auth'], static function(RouteCollection $routes) 
     $routes->get('sales/new','Sales::create');
     $routes->post('sales','Sales::store');
     $routes->get('sales','Sales::index');
-    $routes->get('media/([a-f0-9]{32}\.jpg)','Media::show/$1');
+    $routes->get('media/([a-f0-9]{32}\.(?:jpg|png|webp))','Media::show/$1');
 });

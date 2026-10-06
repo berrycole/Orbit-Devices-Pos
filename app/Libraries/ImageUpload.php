@@ -8,6 +8,16 @@ class ImageUpload
         if (!$file->isValid() || $file->getSize()>2097152 || !in_array($file->getMimeType(),['image/jpeg','image/png','image/webp'],true)) throw new \DomainException('Upload a valid JPG, PNG or WebP image up to 2 MB.');
         $size=@getimagesize($file->getTempName());
         if (!$size || $size[0]>6000 || $size[1]>6000 || $size[0]*$size[1]>16000000) throw new \DomainException('Image dimensions must be at most 6000 pixels per side and 16 megapixels.');
+        if (env('ORBIT_MEDIA_STORAGE') === 'database') {
+            $extension = ['image/jpeg'=>'jpg','image/png'=>'png','image/webp'=>'webp'][$file->getMimeType()];
+            $name = bin2hex(random_bytes(16)).'.'.$extension;
+            $bytes = file_get_contents($file->getTempName());
+            if ($bytes === false) throw new \DomainException('The image could not be read.');
+            if (!db_connect()->table('media')->insert(['name'=>$name,'mime'=>$file->getMimeType(),'data'=>base64_encode($bytes)])) {
+                throw new \DomainException('The image could not be saved.');
+            }
+            return 'media/'.$name;
+        }
         $name=bin2hex(random_bytes(16)).'.jpg';
         $dir=WRITEPATH.'uploads/';
         if (!is_dir($dir)) mkdir($dir,0770,true);

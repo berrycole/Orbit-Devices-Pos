@@ -46,7 +46,7 @@ class Catalog extends BaseController
             if(!$id) $data['created_at']=date('Y-m-d H:i:s');
             if($id) $model->update($id,$data); else $model->insert($data);
         } catch (\DomainException $e) { return redirect()->back()->with('error',$e->getMessage())->with('values',array_diff_key($data,['password'=>true])); }
-        catch (\Throwable $e) { if($uploaded) @unlink(WRITEPATH.'uploads/'.basename($uploaded)); log_message('error','Catalog save: '.$e->getMessage()); return redirect()->back()->with('error','The record could not be saved. Please try again.'); }
+        catch (\Throwable $e) { if($uploaded) { if(env('ORBIT_MEDIA_STORAGE')==='database') db_connect()->table('media')->where('name',basename($uploaded))->delete(); else @unlink(WRITEPATH.'uploads/'.basename($uploaded)); } log_message('error','Catalog save: '.$e->getMessage()); return redirect()->back()->with('error','The record could not be saved. Please try again.'); }
         if($entity==='staff' && $id==session('user_id')) session()->set(['full_name'=>$data['full_name'],'username'=>$data['username']]);
         return redirect()->to(site_url($entity))->with('success','Saved successfully.');
     }

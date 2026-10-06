@@ -55,6 +55,13 @@ class Paths
      */
     public string $writableDirectory = __DIR__ . '/../../writable';
 
+    public function __construct()
+    {
+        if (getenv('ORBIT_SERVERLESS')) {
+            $this->writableDirectory = sys_get_temp_dir() . '/orbit-writable';
+        }
+    }
+
     /**
      * ---------------------------------------------------------------
      * TESTS DIRECTORY NAME

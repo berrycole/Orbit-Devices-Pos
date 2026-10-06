@@ -5,6 +5,7 @@ namespace Config;
 use CodeIgniter\Config\BaseConfig;
 use CodeIgniter\Session\Handlers\BaseHandler;
 use CodeIgniter\Session\Handlers\FileHandler;
+use CodeIgniter\Session\Handlers\DatabaseHandler;
 
 class Session extends BaseConfig
 {
@@ -125,4 +126,13 @@ class Session extends BaseConfig
      * seconds.
      */
     public int $lockMaxRetries = 300;
+
+    public function __construct()
+    {
+        parent::__construct();
+        if (env('ORBIT_SERVERLESS')) {
+            $this->driver = DatabaseHandler::class;
+            $this->savePath = 'ci_sessions';
+        }
+    }
 }

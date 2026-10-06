@@ -127,6 +127,24 @@ final class PosTest extends CIUnitTestCase
         $file=new TestUploadedFile($source,'fake.jpg','image/jpeg',filesize($source),UPLOAD_ERR_OK);
         try { $this->expectException(\DomainException::class);(new \App\Libraries\ImageUpload())->store($file); } finally {unlink($source);}
     }
+    public function testServerlessImageSurvivesOutsideLocalFilesystem(): void
+    {
+        $source=tempnam(sys_get_temp_dir(),'orbit');
+        $image=imagecreatetruecolor(24,24);imagepng($image,$source);imagedestroy($image);
+        putenv('ORBIT_MEDIA_STORAGE=database');
+        try {
+            $file=new TestUploadedFile($source,'device.png','image/png',filesize($source),UPLOAD_ERR_OK);
+            $stored=(new \App\Libraries\ImageUpload())->store($file);
+            $name=basename($stored);
+            $this->assertFileDoesNotExist(WRITEPATH.'uploads/'.$name);
+            $media=$this->db->table('media')->where('name',$name)->get()->getRowArray();
+            $this->assertSame('image/png',$media['mime']);
+            $this->assertSame(file_get_contents($source),base64_decode($media['data'],true));
+        } finally {
+            putenv('ORBIT_MEDIA_STORAGE');
+            unlink($source);
+        }
+    }
 }
 
 class TestUploadedFile extends \CodeIgniter\HTTP\Files\UploadedFile { public function isValid(): bool { return $this->getError()===UPLOAD_ERR_OK; } }

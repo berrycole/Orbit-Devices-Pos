@@ -4,7 +4,7 @@ A complete CodeIgniter 4 point-of-sale application for the IT0049 Midterm Projec
 
 ## Requirements and setup
 
-- PHP 8.2 or later with intl, mbstring, mysqli, fileinfo, gd, and SQLite3 (for tests)
+- PHP 8.2 or later with intl, mbstring, mysqli, fileinfo, gd for a standard host, and SQLite3 for tests. The Vercel runtime stores original images in MySQL and does not require gd.
 - Composer 2 and MySQL 8 / MariaDB; SQLite is also supported for local previews
 - Apache with mod_rewrite, or the PHP development server locally
 
@@ -31,7 +31,7 @@ For a local SQLite preview, set `database.default.DBDriver = SQLite3` and `datab
 | Record sale | Select one product, optional customer, and positive quantity; calculates the total on the server and deducts stock atomically |
 | Sales history | Product, customer or walk-in, staff, quantity, total price, date/time, and reference number |
 | Validation and security | Server-side validation, escaped HTML output, CSRF-protected POST forms, query builder parameter binding, constrained/re-encoded uploads, and protected image delivery |
-| Documentation and deployment | Setup instructions, Dockerfile, Railway configuration, schema description, automated tests, and deployment instructions |
+| Documentation and deployment | Setup instructions, Dockerfile, Railway and Vercel configuration, schema description, automated tests, and deployment instructions |
 
 All authenticated staff can manage all records, matching the activity's staff-only access requirement. A user with recorded sales cannot be deleted because `sales.sold_by` is a required foreign key. Products are archived to preserve their sales history. No online payment processor is included: recording a sale records a store transaction and inventory movement.
 
@@ -53,6 +53,8 @@ Customer deletion sets `sales.customer_id` to null. Product and staff deletion a
 ## Images
 
 Uploaded JPG, PNG, and WebP files are limited to 2 MB, 6000 pixels per side, and 16 megapixels. They are decoded and re-encoded as JPEG with random filenames. Products fit within 1000 × 1000; avatars are cropped to 256 × 256. Uploaded files live outside the public web root in `writable/uploads`, and authenticated `/media/{filename}` routes serve them as images. Replacing an image leaves the prior file available for backup retention; unused-file cleanup may be added for larger deployments.
+
+On Vercel, uploads instead retain their validated original bytes in the MySQL `media` table, because function filesystems do not persist. Database-backed sessions use `ci_sessions`. The same authenticated media route serves stored images. See [DEPLOYMENT.md](DEPLOYMENT.md) for the required external database setup.
 
 The SVG logo and product illustrations are included in `public/assets`. `node build-assets.cjs` regenerates the device illustrations. Uploaded SVG files are not accepted. Product trademarks identify sample catalog items; the artwork is independently drawn. Fonts use Google Fonts with local system fallbacks.
 
