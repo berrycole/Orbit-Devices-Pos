@@ -10,4 +10,11 @@ foreach (['', 'cache', 'logs', 'session', 'uploads', 'debugbar'] as $directory) 
     $path = sys_get_temp_dir() . '/orbit-writable' . ($directory ? '/' . $directory : '');
     if (!is_dir($path)) mkdir($path, 0700, true);
 }
+register_shutdown_function(static function (): void {
+    if (http_response_code() < 500) return;
+    $logs = glob(sys_get_temp_dir() . '/orbit-writable/logs/log-*.log');
+    if (!$logs) return;
+    $log = file_get_contents(end($logs));
+    if ($log !== false) error_log('Orbit server error: ' . substr($log, -4000));
+});
 require __DIR__ . '/../public/index.php';
